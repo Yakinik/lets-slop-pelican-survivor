@@ -7,7 +7,7 @@ export const OFFER_COUNT = 3;
 /** レベル L から L+1 に必要な経験値 */
 export function xpToNext(level: number): number {
   const l = level - 1;
-  return Math.round(5 + l * 7 + l * l * 0.45);
+  return Math.round(5 + l * 4.2 + l * l * 0.3);
 }
 
 export function isFusionLevel(level: number): boolean {
