@@ -56,7 +56,7 @@ export class Game {
   private readonly ui: UI;
   private readonly input: Input;
   private readonly intro: Intro;
-  private readonly clock = new THREE.Clock();
+  private lastFrame = 0;
   private readonly pending: Pending[] = [];
   private readonly camLook = new THREE.Vector3();
   private readonly tmp = new THREE.Vector3();
@@ -201,9 +201,11 @@ export class Game {
     return Math.min(80, Math.max(30, far + 5));
   }
 
-  private loop = (): void => {
+  private loop = (now: number = performance.now()): void => {
     requestAnimationFrame(this.loop);
-    this.frame(Math.min(this.clock.getDelta(), 0.1));
+    const dt = this.lastFrame ? (now - this.lastFrame) / 1000 : 0;
+    this.lastFrame = now;
+    this.frame(Math.min(dt, 0.1));
   };
 
   /** 1 フレーム進める。render = false ならシミュレーションだけ（デバッグ用の早送り） */
@@ -439,7 +441,6 @@ export class Game {
     } else if (!pause && this.state === 'paused') {
       this.ui.showPause(false);
       this.state = this.pausedFrom;
-      this.clock.getDelta();
     }
   }
 
@@ -482,7 +483,6 @@ export class Game {
         this.ui.showBanner('HP 回復', 'level', 1.2);
       }
       this.state = 'play';
-      this.clock.getDelta();
     });
   }
 
@@ -505,7 +505,6 @@ export class Game {
         break;
     }
     this.state = 'play';
-    this.clock.getDelta();
   }
 
   applyFusion(base: ItemId, partner: ItemId): void {
