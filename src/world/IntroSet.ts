@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { deform, merge, part, smoothstep } from '../render/geo';
+import { deform, hash3, merge, part, smoothstep } from '../render/geo';
 import { vertexColorMaterial } from '../render/materials';
 import { SEA_Y } from './World';
 
@@ -101,7 +101,7 @@ export function buildIntroSet(): THREE.Mesh {
   // 灯台の岩場
   const lx = -32;
   const lz = 26;
-  parts.push(part(deform(new THREE.DodecahedronGeometry(1, 1), (v) => v.multiplyScalar(0.85 + rnd() * 0.3)), '#7c8187', {
+  parts.push(part(deform(new THREE.DodecahedronGeometry(1, 1), (v) => v.multiplyScalar(0.85 + hash3(v) * 0.3)), '#7c8187', {
     p: [lx, SEA_Y + 0.5, lz], s: [9, 5, 8],
   }));
   parts.push(part(new THREE.DodecahedronGeometry(1, 0), '#6d7278', { p: [lx + 8, SEA_Y, lz - 5], s: [3, 2.2, 3] }));
@@ -119,8 +119,9 @@ export function buildIntroSet(): THREE.Mesh {
   ];
   for (const [x, z, r, h] of mountains) {
     const g = deform(new THREE.ConeGeometry(1, 1, 14, 4), (v) => {
-      v.x *= 0.8 + rnd() * 0.4;
-      v.z *= 0.8 + rnd() * 0.4;
+      const k = 0.8 + hash3(v) * 0.4;
+      v.x *= k;
+      v.z *= k;
     });
     parts.push(part(g, (p, _n, out) => {
       out.set('#4f7f5c').lerp(new THREE.Color('#8fb39a'), smoothstep(SEA_Y, SEA_Y + h, p.y));

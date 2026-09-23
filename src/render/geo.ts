@@ -112,6 +112,12 @@ export function smoothNormals(g: THREE.BufferGeometry): void {
   nor.needsUpdate = true;
 }
 
+/** 位置から決まる 0〜1 の擬似乱数。重複した頂点が同じ値になるので変形しても面が割れない */
+export function hash3(v: THREE.Vector3): number {
+  const s = Math.sin(v.x * 12.9898 + v.y * 78.233 + v.z * 37.719) * 43758.5453;
+  return s - Math.floor(s);
+}
+
 export const lerpColor = (a: THREE.Color, b: THREE.Color, t: number, out: THREE.Color) =>
   out.copy(a).lerp(b, Math.min(1, Math.max(0, t)));
 
