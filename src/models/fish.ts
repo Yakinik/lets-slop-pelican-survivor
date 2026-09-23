@@ -96,8 +96,9 @@ function eyes(spec: BodySpec, z: number, yRatio: number, size: number, white = '
   const x = hw * Math.sqrt(Math.max(0.05, 1 - yRatio * yRatio)) * 0.92;
   const out: THREE.BufferGeometry[] = [];
   for (const sx of [-1, 1]) {
-    out.push(part(new THREE.SphereGeometry(size, 10, 8), white, { p: [x * sx, y, z], s: [0.55, 1, 1] }));
-    out.push(part(new THREE.SphereGeometry(size * 0.62, 10, 8), '#0b0b0f', { p: [(x + size * 0.28) * sx, y, z + size * 0.1], s: [0.55, 1, 1] }));
+    // 画面上では数ピクセルなので分割は最小限にする
+    out.push(part(new THREE.SphereGeometry(size, 7, 5), white, { p: [x * sx, y, z], s: [0.55, 1, 1] }));
+    out.push(part(new THREE.SphereGeometry(size * 0.62, 6, 4), '#0b0b0f', { p: [(x + size * 0.28) * sx, y, z + size * 0.1], s: [0.55, 1, 1] }));
   }
   return out;
 }
@@ -105,7 +106,7 @@ function eyes(spec: BodySpec, z: number, yRatio: number, size: number, white = '
 function pectorals(spec: BodySpec, z: number, len: number, color: string): THREE.BufferGeometry[] {
   const [hw, hh] = sectionAt(spec, z);
   return [-1, 1].map((sx) =>
-    part(new THREE.SphereGeometry(1, 10, 6), color, {
+    part(new THREE.SphereGeometry(1, 8, 4), color, {
       p: [(hw + len * 0.35) * sx, -hh * 0.35, z - len * 0.4],
       r: [0, 0.6 * sx, -0.5 * sx],
       s: [len * 0.5, 0.02, len * 0.28],
