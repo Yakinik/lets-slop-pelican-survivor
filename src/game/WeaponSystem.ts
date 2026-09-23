@@ -487,14 +487,20 @@ export class WeaponSystem {
       const col = r.tint.equals(WHITE) ? FROST_COLOR : r.tint.clone().multiplyScalar(1.8);
       ctx.fx.ring(r.x, 0.2, r.z, r.r, col, 1.2 * (1 - k * 0.7), 0.16);
       ctx.fx.ring(r.x, 0.15, r.z, r.r, col, 0.25 * (1 - k), 1.0, 0.3);
+      // 撃破で魚のリストが入れ替わるので、先に命中対象を集めてから処理する
+      const hits = this.targets;
+      hits.length = 0;
       for (const f of ctx.fish.list) {
         if (r.hit.has(f.uid)) continue;
         const d = Math.hypot(f.x - r.x, f.z - r.z);
         if (d <= r.r + f.radius && d >= prev - f.radius - 1) {
           r.hit.add(f.uid);
-          const l = d || 1;
-          ctx.combat.hit(f, r.ws.damage, { ws: r.ws, slot: WEAPON_IDS.indexOf('bell'), secondary: false, dirx: (f.x - r.x) / l, dirz: (f.z - r.z) / l });
+          hits.push(f);
         }
+      }
+      for (const f of hits) {
+        const l = Math.hypot(f.x - r.x, f.z - r.z) || 1;
+        ctx.combat.hit(f, r.ws.damage, { ws: r.ws, slot: WEAPON_IDS.indexOf('bell'), secondary: false, dirx: (f.x - r.x) / l, dirz: (f.z - r.z) / l });
       }
       ctx.bullets.clearCircle(r.x, r.z, r.r, (x, z) => {
         if (Math.random() < 0.5) ctx.sparks.emit({ x, y: 0.3, z, count: 2, color: FROST_COLOR, speed: 3, size: 0.8, life: 0.3 });
