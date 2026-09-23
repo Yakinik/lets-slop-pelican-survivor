@@ -55,10 +55,13 @@ function fishMaterial(model: FishModel): { mat: THREE.MeshStandardMaterial; time
 totalEmissiveRadiance += vColor.rgb * vGlow * 3.0;
 totalEmissiveRadiance += vec3(1.0) * vFx.y * 1.4;
 totalEmissiveRadiance += vec3(1.0, 0.38, 0.06) * vFx.w * (0.55 + 0.45 * sin(uTime * 24.0 + vFx.x * 7.0));
-totalEmissiveRadiance += vec3(0.15, 0.45, 0.7) * vFx.z * 0.35;`,
+totalEmissiveRadiance += vec3(0.15, 0.45, 0.7) * vFx.z * 0.35;
+// 海や雲の上でも輪郭が分かるよう、縁を明るくする
+float rim = 1.0 - max(dot(normalize(vNormal), normalize(vViewPosition)), 0.0);
+totalEmissiveRadiance += vec3(1.0, 0.95, 0.85) * pow(rim, 2.5) * 0.55;`,
       );
   };
-  mat.customProgramCacheKey = () => 'fish-v1';
+  mat.customProgramCacheKey = () => 'fish-v2';
   return { mat, time };
 }
 

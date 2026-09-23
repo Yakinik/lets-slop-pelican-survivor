@@ -50,6 +50,7 @@ export class Engine {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.0;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.info.autoReset = false;
     container.appendChild(this.renderer.domElement);
     this.renderer.domElement.classList.add('game-canvas');
 
@@ -152,6 +153,8 @@ export class Engine {
   }
 
   render(): void {
+    // コンポーザは複数回 render を呼ぶので、1 フレーム分をまとめて数える
+    this.renderer.info.reset();
     if (this.composer) this.composer.render();
     else this.renderer.render(this.scene, this.camera);
   }
