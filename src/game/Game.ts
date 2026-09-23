@@ -142,7 +142,13 @@ export class Game {
       if (this.state === 'play' || this.state === 'paused') this.togglePause(this.state === 'play');
     };
     window.addEventListener('keydown', (e) => {
-      if (this.state === 'intro' && (e.code === 'Space' || e.code === 'Enter')) this.skipIntro();
+      if (e.code !== 'Space' && e.code !== 'Enter') return;
+      if (this.state === 'intro') this.skipIntro();
+      else if (this.state === 'title') {
+        this.sfx.unlock();
+        this.sfx.play('select');
+        this.startRun();
+      }
     });
     this.engine.renderer.domElement.addEventListener('pointerdown', () => {
       if (this.state === 'intro') this.skipIntro();
