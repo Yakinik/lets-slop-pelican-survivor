@@ -3,7 +3,7 @@ import { deform, merge, part, smoothstep } from '../render/geo';
 import { vertexColorMaterial } from '../render/materials';
 
 /** 海面の高さ。ゲーム中のペリカンは y = 0 を飛ぶ */
-export const SEA_Y = -45;
+export const SEA_Y = -70;
 /** 太陽の方向（太陽へ向かうベクトル） */
 export const SUN_DIR = new THREE.Vector3(0.35, 0.42, -1).normalize();
 
@@ -112,7 +112,7 @@ void main() {
   #include <colorspace_fragment>
 }`;
 
-const CLOUD_COUNT = 72;
+const CLOUD_COUNT = 54;
 const CLOUD_TILE = 420;
 
 class Clouds {
@@ -134,9 +134,9 @@ class Clouds {
     for (let i = 0; i < CLOUD_COUNT; i++) {
       this.data.push({
         x: (Math.random() - 0.5) * CLOUD_TILE,
-        y: -12 - Math.random() * 26,
+        y: -24 - Math.random() * 34,
         z: (Math.random() - 0.5) * CLOUD_TILE,
-        s: 5 + Math.random() * 10,
+        s: 4 + Math.random() * 7,
         rot: Math.random() * Math.PI * 2,
         variant: i % variants.length,
         speed: 0.6 + Math.random() * 0.8,
@@ -144,7 +144,7 @@ class Clouds {
     }
   }
 
-  update(dt: number, focus: THREE.Vector3): void {
+  update(dt: number, focus: THREE.Vector3, eye: THREE.Vector3): void {
     const counts = [0, 0, 0];
     const half = CLOUD_TILE / 2;
     for (const c of this.data) {
@@ -154,6 +154,12 @@ class Clouds {
       else if (c.x - focus.x < -half) c.x += CLOUD_TILE;
       if (c.z - focus.z > half) c.z -= CLOUD_TILE;
       else if (c.z - focus.z < -half) c.z += CLOUD_TILE;
+      // カメラが雲の中に入って画面が真っ白にならないよう、近すぎる雲は描かない
+      const ex = c.x - eye.x;
+      const ey = c.y - eye.y;
+      const ez = c.z - eye.z;
+      const near = c.s * 1.7 + 3;
+      if (ex * ex + ey * ey + ez * ez < near * near) continue;
       const d = this.dummy;
       d.position.set(c.x, c.y, c.z);
       d.rotation.set(0, c.rot, 0);
@@ -175,8 +181,8 @@ function buildCloudGeometry(seed: number): THREE.BufferGeometry {
     s = (s * 9301 + 49297) % 233280;
     return s / 233280;
   };
-  const top = new THREE.Color('#ffffff');
-  const bottom = new THREE.Color('#b9c9dc');
+  const top = new THREE.Color('#e6eef6');
+  const bottom = new THREE.Color('#9fb4cc');
   const parts: THREE.BufferGeometry[] = [];
   const puffs = 7 + Math.floor(rnd() * 4);
   for (let i = 0; i < puffs; i++) {
@@ -241,7 +247,7 @@ export class World {
     this.ocean.frustumCulled = false;
 
     scene.add(this.sky, this.ocean, this.clouds.group);
-    scene.fog = new THREE.Fog(COLORS.haze, 140, 700);
+    scene.fog = new THREE.Fog(COLORS.haze, 55, 520);
     scene.background = COLORS.haze;
 
     const hemi = new THREE.HemisphereLight('#d6ecff', '#2c6f8f', 1.25);
@@ -266,6 +272,6 @@ export class World {
     this.sky.position.copy(camera.position);
     this.ocean.position.x = camera.position.x;
     this.ocean.position.z = camera.position.z;
-    this.clouds.update(dt, focus);
+    this.clouds.update(dt, focus, camera.position);
   }
 }
