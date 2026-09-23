@@ -24,6 +24,8 @@ export class DamageText {
   private head = 0;
   private readonly p = new THREE.Vector3();
   private dpr = 1;
+  /** 前のフレームで何か描いたか（何もなければ消去も省く） */
+  private drewLast = false;
 
   constructor(parent: HTMLElement) {
     this.canvas = document.createElement('canvas');
@@ -59,12 +61,14 @@ export class DamageText {
   clear(): void {
     this.n = 0;
     this.head = 0;
+    this.drewLast = false;
     this.g.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   update(dt: number, camera: THREE.Camera): void {
     const g = this.g;
-    g.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    if (this.drewLast) g.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.drewLast = false;
     if (!this.enabled) return;
     const w = this.canvas.width;
     const h = this.canvas.height;
@@ -86,6 +90,7 @@ export class DamageText {
       g.lineWidth = 3.2 * this.dpr;
       g.strokeStyle = 'rgba(10, 30, 60, 0.85)';
       const text = String(this.v[i]);
+      this.drewLast = true;
       g.strokeText(text, sx, sy);
       g.fillStyle = st.fill;
       g.fillText(text, sx, sy);
