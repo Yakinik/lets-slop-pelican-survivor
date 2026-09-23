@@ -12,14 +12,24 @@ export const PELICAN_PLAY_SCALE = 1.35;
 
 export const POEM = ['夏の日差し', '優しく迎えてくれるのは', '空飛ぶ魚だけなのか？'];
 
-/** 実時間でのタイムライン（秒） */
+/** 詩の一行が浮かび上がりきるまでの秒数（style.css の .poem p の transition と合わせる） */
+const POEM_LINE_FADE_IN = 2.4;
+/** 全行がそろってから表示し続ける秒数 */
+const POEM_HOLD = 1.5;
+/** 詩が消えるまでの秒数（style.css の .poem.out の transition と合わせる） */
+const POEM_FADE_OUT = 1.4;
+
+const POEM_AT = [3.9, 5.6, 7.3] as const;
+const POEM_OUT = POEM_AT[2] + POEM_LINE_FADE_IN + POEM_HOLD;
+
+/** 実時間でのタイムライン（秒）。詩が消えきると同時にゲームが始まる */
 const T = {
   takeoff: 3.4,
   slowIn: [3.3, 3.9],
-  poem: [3.9, 5.6, 7.3],
+  poem: POEM_AT,
   slowOut: [9.6, 10.3],
-  poemOut: 9.6,
-  end: 12.6,
+  poemOut: POEM_OUT,
+  end: POEM_OUT + POEM_FADE_OUT,
 } as const;
 
 const SLOW = 0.3;
@@ -141,7 +151,8 @@ export class Intro {
         h.padStop();
       });
     }
-    if (this.t >= T.slowOut[0] + 0.4) this.once('cinematicOff', () => h.cinematic(false));
+    // 黒帯と光漏れは詩と一緒に退く
+    if (this.t >= T.poemOut) this.once('cinematicOff', () => h.cinematic(false));
 
     // 最後の上昇: 雲を突き抜けてゲームの高度 y = 0 へ
     if (this.t >= T.slowOut[0]) {
